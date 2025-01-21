@@ -5,6 +5,7 @@ const companySchema=await mongoose.Schema({
     place:{type:String},
     email:{type:String},
     phone:{type:String},
+    profile:{type:String},
     userID:{type:String}
    
 })

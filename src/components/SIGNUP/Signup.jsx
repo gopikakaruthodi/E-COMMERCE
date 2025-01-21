@@ -1,11 +1,17 @@
 import React, { useState } from 'react'
 import axios from 'axios'
 import {useNavigate} from 'react-router-dom'
+import Api from '../../API/Api'
+import { ToastContainer, toast } from 'react-toastify';
+
+
+
 
 const Signup = () => {
+    const api=Api()
     const navigate=useNavigate()
     const [userData,setuserData]=useState({
-        username:"",email:"",phone:"",password:"",cpassword:""
+        username:"",email:"",phone:"",password:"",cpassword:"",accountType:""
     })
 
     const handleChange=(e)=>{
@@ -14,33 +20,36 @@ const Signup = () => {
     const handleSubmit=async(e)=>{
         e.preventDefault()
         try {
-            const {data}=await axios.post("http://localhost:3000/api/signup",userData)
-            // console.log(data);
-            // // toast(`${data.msg}`, {
-            // //     position: "top-right",
-            // //     autoClose: 5000,
-            // //     hideProgressBar: false,
-            // //     closeOnClick: false,
-            // //     pauseOnHover: true,
-            // //     draggable: true,
-            // //     progress: undefined,
-            // //     theme: "dark",
-            // // });
-            alert(data.msg)
-            navigate('/signin')
+            const {data}=await axios.post(`${api}/signup`,userData)
+            toast(`${data.msg}`, {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+            });
+            
+            // alert(data.msg)
+           setTimeout(()=>{
+            navigate('/')
+           },3000)
+            // alert(data.msg)
             
         } catch (error) {
             console.log(error);
-            // toast(`${error.response.data.msg}`, {
-            //     position: "top-right",
-            //     autoClose: 3000,
-            //     hideProgressBar: false,
-            //     closeOnClick: false,
-            //     pauseOnHover: true,
-            //     draggable: false,
-            //     progress: undefined,
-            //     theme: "dark",
-            // });
+            toast(`${error.response.data.msg}`, {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: false,
+                progress: undefined,
+                theme: "dark",
+            });
             alert(error.response.data.msg)
             
         }
@@ -112,7 +121,7 @@ const Signup = () => {
                                                 type="text"
                                                 name="phone"
                                                 onChange={handleChange}
-                                                placeholder="Enter email to get started"
+                                                placeholder=""
                                                 className="block w-full py-4 pl-10 pr-4 text-black placeholder-gray-500 transition-all duration-200 bg-white border border-gray-200 rounded-md focus:outline-none focus:border-blue-600 caret-blue-600"
                                             />
                                         </div>
@@ -198,9 +207,10 @@ const Signup = () => {
                                     </div>
 
                                     <div>
-                                        <button type="submit" onClick={handleSubmit} className="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-white transition-all duration-200 bg-blue-600 border border-transparent rounded-md focus:outline-none hover:bg-blue-700 focus:bg-blue-700">
+                                        <button type="submit" onClick={handleSubmit} className="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-white transition-all duration-200 bg-yellow-600 border border-transparent rounded-md focus:outline-none hover:bg-yellow-700 focus:bg-yellow-700">
                                             Create Account
                                         </button>
+                                        <ToastContainer />
                                     </div>
 
                                     {/* <div className="text-center">

@@ -1,111 +1,81 @@
-  import React, { useState } from 'react';
-  import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import Api from '../../API/Api';
 
-  const Navbar = () => {
+
+  const Home = ({setUser,setProfile}) => {
+    const api=Api()
     const navigate=useNavigate()
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [isMenuOpen, setIsMenuOpen] = useState(false); // For mobile menu toggle
+    const token =localStorage.getItem('Token')
+    const [products, setProducts] = useState([]);
+    const [searchQuery, setSearchQuery] = useState(""); 
 
-    const toggleDropdown = () => {
-      setIsDropdownOpen((prev) => !prev);
-    };
 
-    const closeDropdown = () => {
-      setIsDropdownOpen(false);
-    };
+    useEffect(()=>{
+      fetchData()
+     },[])
 
-    const toggleMobileMenu = () => {
-      setIsMenuOpen((prev) => !prev);
-    };
+     const fetchData=async()=>{
+      try {
+        if(token){
+          const {data}=await axios.get(`${api}/displayproducts`, { headers: { "authorization": `Bearer ${token}` } })
+          // console.log(data);
+          setProducts(data.products)
+          setUser(data.user.username)
+          if(data.user.profile){
+            setProfile(data.user.profile)
+          }
+        }
+        else{
+          navigate('/signin')
+        }
+        
+      } catch (error) {
+        console.log(error);
+        navigate('/signin')
 
-    const logout=()=>{
-      localStorage.removeItem('token')
-      navigate('/signin')
-   }
-
-    return (
-      <nav className="bg-yellow-700 p-3 shadow-md">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          {/* Logo/Title */}
-          <div className="text-white font-bold text-2xl">
-            Home Page
-          </div>
-
-          {/* Desktop Profile Dropdown */}
-          <div className="hidden md:block relative ">
-            <button 
-              onClick={toggleDropdown} 
-              className="flex items-center space-x-2 text-white"
-            >
-              <img 
-                src="https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250" 
-                alt="Profile" 
-                className="rounded-full w-10 h-10"
-              />
-            </button>
-
-            {/* Dropdown Menu */}
-            {isDropdownOpen && (
-              <div 
-                className="absolute right-0 mt-2  w-36 bg-black rounded-xl shadow-lg z-50  hover:bg-black text-white" 
-                onClick={closeDropdown}
-              >
-                <ul className="py-2 text-center px-3">
-                  <li>
-                    <Link to={'/profile'} className="block px-4 py-2 font-bold text-yellow-500 hover:text-white">Profile</Link>
-                    {/* <a href="./" >Profile</a> */}
-                  </li>
-                  <hr />
-                  <li>
-                    <p className="block px-4 py-2 font-bold text-yellow-500 hover:text-white" onClick={logout} >Logout</p>
-                  </li>
-                </ul>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile Hamburger Menu */}
-          <div className="md:hidden flex items-center">
-            <button onClick={toggleMobileMenu} className="text-white">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="h-6 w-6" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24" 
-                strokeWidth="2"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu Dropdown */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-white shadow-md mt-2 rounded-md">
-            <ul className="py-2">
-              <li>
-                <a href="#" className="block px-4 py-2 text-gray-800 hover:bg-gray-200">Profile</a>
-              </li>
-              <li>
-                <a href="#" className="block px-4 py-2 text-gray-800 hover:bg-gray-200">Logout</a>
-              </li>
-            </ul>
-          </div>
-        )}
-      </nav>
+      }
+     }
+    //  console.log(products);
+     
+     const filteredProducts = products.filter((product) =>
+      product.productName.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  };
-
-  const Home = () => {
+    
     return (
       <div>
-        <Navbar />
+        {/* search */}
+      <div className="max-w-3xl m-3">
+      <input
+        type="search"
+        placeholder="Search for products..."
+        className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      />
+    </div>
         {/* Main Content */}
-        <div className="py-16 px-8">
-          {/* <h1 className="text-3xl font-semibold text-center text-gray-800">Welcome to the Home Page</h1> */}
-          {/* <p className="mt-4 text-center text-gray-600">This is a sample homepage with a React navbar using Tailwind CSS. It is responsive to all screen sizes.</p> */}
+        <h2 className="text-2xl mt-4 ml-5 font-bold tracking-tight text-gray-900">Trending products</h2>
+        <div className="grid grid-cols-1 mt-7 ml-10 sm:grid-cols-2 lg:grid-cols-4">
+          {filteredProducts.map((prod)=><>
+          <Link to={`/productfulldetails/${prod._id}`} key={prod._id} ><div
+                    
+                    className="w-5/6 border border-gray-300 rounded overflow-hidden shadow-sm hover:shadow-lg shadow-gray-400  transition-shadow duration-300"
+                  >
+                    <div className="h-80 aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200">
+                      <img src={prod.images[0]} alt="image" className=" h-full w-full object-cover object-center group-hover:opacity-75" />
+                    </div>
+                    <div className="p-4 grid justify-center text-center">
+                                   <p className="text-sm text-gray-500">{prod.category}</p>
+                      <h3 className="text-lg font-semibold mb-2">{prod.productName}</h3>
+                      <p className="mt-1 text-gray-900">₹{prod.price}</p>
+                      <button className="w-full mt-4 py-2 border border-green-700 text-green-600 px-5 rounded hover:bg-gray-100 transition-colors">
+                        View More
+                      </button>
+                    </div>
+                  </div></Link> 
+          </>)}
         </div>
       </div>
     );
@@ -113,3 +83,4 @@
 
 
   export default Home
+

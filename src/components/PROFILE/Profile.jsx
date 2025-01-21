@@ -3,20 +3,25 @@ import React, { useEffect, useState } from 'react';
 import Api from '../../API/Api';
 import { useNavigate, Link } from 'react-router-dom';
 import { DotsVerticalIcon } from '@heroicons/react/solid'; // Heroicons for 3 dots
+import { RiAccountCircleFill } from "react-icons/ri";
+import { MdAccountTree } from "react-icons/md";
 
-const Profile = () => {
+const Profile = ({setUser,setProfile}) => {
   const token = localStorage.getItem('Token');
   const navigate = useNavigate();
   const api = Api();
   const [currentView, setCurrentView] = useState('profile'); // Track current view (profile, address, add address)
   const [isEditing, setIsEditing] = useState(false);
   const [dropdownStates, setDropdownStates] = useState([]); // Dropdown state for each address
+  const [profilepic, setProfilepic] = useState(false); // Dropdown state for each address
   const [profileData, setProfileData] = useState({
     username: '',
     email: '',
-    phone: ''
+    phone: '',
+    profile:''
   });
   const [addressData, setAddressData] = useState([]);
+  const [type, setType] = useState("");
   const [newAddress, setNewAddress] = useState({
     place: '',
     house: '',
@@ -31,17 +36,32 @@ const Profile = () => {
   }, []);
 
   const fetchProfileData = async () => {
+   try {
     if (token) {
       const { data } = await axios.get(`${api}/displayprofile`, { headers: { "authorization": `Bearer ${token}` } });
-      setProfileData(data);
+      console.log(data);
+      
+      setProfileData(data.data);
+      setType(data.data.accountType)
+      setUser(data.user.username)
+      if(data.user.profile){
+        setProfile(data.user.profile)
+      }
+      if(data.user.profile)
+        setProfilepic(true)
     } else {
       navigate('/signin');
     }
+   } catch (error) {
+    console.log(error);
+    navigate('/signin');
+    
+   }
   };
 
   const fetchAddressData = async () => {
-    const { data } = await axios.get(`${api}/getAddress`);
-    setAddressData(data);
+    const { data } = await axios.get(`${api}/getAddress`,{ headers: { "authorization": `Bearer ${token}` } });
+    setAddressData(data.address);
     setDropdownStates(new Array(data.length).fill(false)); // Initialize dropdown states for each address
   };
 
@@ -57,14 +77,17 @@ const Profile = () => {
     try {
       const { data } = await axios.put(`${api}/editProfile`, profileData, { headers: { "authorization": `Bearer ${token}` } });
       alert(data.msg);
+      if(profileData.profile)
+        setProfilepic(true)
       setIsEditing(false);
+
     } catch (error) {
       console.log(error);
     }
   };
 
   const handleAddrSubmit = async () => {
-    const { data } = await axios.post(`${api}/address`, newAddress);
+    const { data } = await axios.post(`${api}/address`, newAddress,{ headers: { "authorization": `Bearer ${token}` } });
     alert(data.msg);
     setNewAddress({
       place: '',
@@ -98,16 +121,30 @@ const Profile = () => {
       }
     }
   };
+console.log(type);
 
   const handleSave = async (id, index) => {
     const updatedAddress = { ...addressData[index], ...newAddress }; // Merge newAddress into the current address
     try {
-      const { data } = await axios.put(`${api}/editAddress/${id}`, updatedAddress);
+      const { data } = await axios.put(`${api}/editAddress/${id}`, updatedAddress,{ headers: { "authorization": `Bearer ${token}` } });
       alert(data.msg);
       setEditingAddressIndex(null); // Stop editing
       fetchAddressData(); // Refresh the address data
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        // setProfilepic(reader.result);
+        setProfileData((pre) => ({...pre,[e.target.name]: reader.result}));
+
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -127,39 +164,94 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 font-sans px-10 flex justify-center flex-col md:flex-row">
-      <div className="w-full md:w-1/4 p-6 bg-white border-b md:border-r border-gray-300 text-center md:text-center">
+    <div className="w-full h-full bg-gray-100 font-sans px-10 py-10 flex justify-center flex-col md:flex-row ">
+      <div className="w-full mr-2 shadow-lg md:w-1/4 p-6 bg-white  md:text-center md:text-center md:border-r-4 md:border-b-0">
         <div className='md:grid justify-center flex-wrap mt-10'>
-          <img
+          {profilepic?<img
+            src={profileData.profile}
+            alt="Profile"
+            className="w-28 h-28 rounded-full mx-auto md:mx-0 mb-4 object-cover"
+          />:<img
             src="https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250"
             alt="Profile"
             className="w-28 h-28 rounded-full mx-auto md:mx-0 mb-4"
-          />
+          />}
           <p className="text-xs text-gray-500">username</p>
           <p className="text-2xl font-semibold text-gray-800 mt-3">{profileData.username}</p>
         </div>
-        <div className="space-y-4 mt-16">
-          <button
-            onClick={() => setCurrentView('profile')}
-            className="w-1/2 py-2 px-4 mx-5 bg-yellow-600 text-white rounded-md hover:bg-yellow-700"
-          >
-            View Profile
-          </button>
-          <button
-            onClick={() => setCurrentView('address')}
-            className="w-1/2 py-2 px-4 mx-5 bg-gray-600 text-white rounded-md hover:bg-gray-700"
-          >
-            Manage Address
-          </button>
+        <div className="space-y-4 mt-8">
+          <table>
+            <thead>
+            <tr>
+            <th className='px-4 py-3 '>
+            <RiAccountCircleFill className='w-6 h-6' />
+            </th>
+            <th className='px-4 py-3 text-left'>
+              <p className='text-gray-500 font-bold text-lg'>ACCOUNT DETAILS</p>
+            </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td></td>
+              <td className=''>
+              <button
+                  onClick={() => setCurrentView('profile')}
+                  className="w-full text-left py-2  mx-5 text-gray-800  rounded-md hover:text-yellow-700 hover:bg-gray-100 "
+                >
+                  View Profile
+                </button>
+                <button
+                  onClick={() => setCurrentView('address')}
+                  className="w-full py-2 text-left mx-5 text-gray-800 rounded-md hover:text-yellow-700 hover:bg-gray-100"
+                >
+                  Manage Address
+                </button>
+               </td>
+            </tr>
+            <tr>
+            <th className='px-4 py-3 '>
+            <MdAccountTree className='w-6 h-6' />
+            </th>
+            <th className='px-4 py-3 text-left'>
+              <p className='text-gray-500 font-bold text-lg'>MY STUFFS</p>
+            </th>
+            </tr>
+            <tr>
+              <td></td>
+              <td className=''>
+                <button
+                  onClick={() => navigate('/orderslist')}
+                  className="w-full py-2 text-left mx-5 text-gray-800 rounded-md hover:text-yellow-700 hover:bg-gray-100"
+                >
+                  My Orders
+                </button>
+                <button
+                  onClick={() => navigate('/cart')}
+                  className="w-full py-2 text-left mx-5 text-gray-800 rounded-md hover:text-yellow-700 hover:bg-gray-100"
+                >
+                  My Cart
+                </button>
+                <button
+                  onClick={() => navigate('/wishlist')}
+                  className="w-full py-2 text-left mx-5 text-gray-800 rounded-md hover:text-yellow-700 hover:bg-gray-100"
+                >
+                  My Wishlist
+                </button>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+          
         </div>
       </div>
 
-      <div className="w-full border-b md:w-2/3 p-6 bg-white">
+      <div className="w-full shadow-lg border-b md:w-2/3 p-6 bg-white ">
         {currentView === 'profile' ? (
           <div>
-            <Link to={'/sell'} className='float-right'>
-              <button className='bg-yellow-600 text-white border font-semibold rounded-md px-2 shadow-md py-1 hover:bg-yellow-500'>SELL</button>
-            </Link>
+            {type==='Seller'?<Link to={'/sell'} className='float-right'>
+              <button className='bg-yellow-600 text-white border font-semibold rounded-md px-2 shadow-md py-1 hover:bg-yellow-700'>SELL</button>
+            </Link>:<></>}
             <h2 className="text-3xl font-semibold text-gray-800 mb-4">Profile Details</h2>
             <div className="space-y-4">
               <div>
@@ -173,6 +265,17 @@ const Profile = () => {
                   className="w-1/2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
+             {isEditing?<div>
+                <label className="block text-gray-700">Profile</label>
+                <input
+                  type="file"
+                  name="profile"
+                  // value={profileData.profile}
+                  onChange={handleAvatarChange}
+                  disabled={!isEditing}
+                  className="w-1/2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>:<></>}
               <div>
                 <label className="block text-gray-700">Email</label>
                 <input
@@ -197,7 +300,7 @@ const Profile = () => {
               </div>
               <button
                 onClick={handleClick}
-                className="w-1/6 bg-yellow-600 text-white font-semibold py-3 rounded-lg hover:bg-yellow-700"
+                className="w-1/6 bg-yellow-700 text-white font-semibold py-3 rounded-lg hover:bg-yellow-600"
               >
                 {isEditing ? 'Save' : 'Edit'}
               </button>
@@ -206,8 +309,18 @@ const Profile = () => {
         ) : currentView === 'address' ? (
           <div>
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">Manage Address</h2>
-            {addressData.length === 0 ? (
+            {addressData.length === 0 ? ( 
+              <>
+               <div>
+               <button
+                   onClick={() => setCurrentView('addAddress')}
+                   className="w-1/4 py-2  text-green-600 text-start text-lg font-semibold rounded-md  hover:text-green-500 "
+                 >
+                   +Add Address
+                 </button>
+               </div>
               <p className="text-gray-600">No addresses added yet.</p>
+              </>
             ) : (
               <div className='w-3/4'>
               <div>

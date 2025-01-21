@@ -4,7 +4,8 @@ const {verify}=jwt
 export default async function Auth(req,res,next) {
     try {
         // console.log('-------------------');       
-        // console.log(req.headers.authorization);
+        // console.log(req.headers);
+        
         const token=req.headers.authorization;
         // console.log(token);
         const key=token.split(" ")[1]

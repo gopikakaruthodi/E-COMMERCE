@@ -1,8 +1,13 @@
 import React , { useState } from 'react'
 import { Link ,useNavigate} from 'react-router-dom'
 import axios from 'axios'
+import Api from '../../API/Api'
+import { ToastContainer, toast } from 'react-toastify';
+
+
 
 const Signin = () => {
+    const api=Api()
     const navigate=useNavigate()
     const [userData,setuserData]=useState({
         email:"",password:""
@@ -13,36 +18,37 @@ const Signin = () => {
     const handleSubmit=async(e)=>{
         e.preventDefault()
         try {
-            const {data}=await axios.post("http://localhost:3000/api/signin",userData)
+            const {data}=await axios.post(`${api}/signin`,userData)
             console.log(data.token);
-            // toast(`${data.msg}`, {
-            //     position: "top-right",
-            //     autoClose: 5000,
-            //     hideProgressBar: false,
-            //     closeOnClick: false,
-            //     pauseOnHover: true,
-            //     draggable: true,
-            //     progress: undefined,
-            //     theme: "dark",
-            // });
-            
             localStorage.setItem('Token',data.token)
-            alert(data.msg)
+            toast.success(`${data.msg}`, {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+            });
+            
+           setTimeout(()=>{
             navigate('/')
+           },3000)
             
         } catch (error) {
             console.log(error);
-            // toast(`${error.response.data.msg}`, {
-            //     position: "top-right",
-            //     autoClose: 3000,
-            //     hideProgressBar: false,
-            //     closeOnClick: false,
-            //     pauseOnHover: true,
-            //     draggable: false,
-            //     progress: undefined,
-            //     theme: "dark",
-            // });
-            alert(error.response.data.msg)
+            toast.error(`${error.response.data.msg}`, {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                });
+            // alert(error.response.data.msg)
             
         }
     }
@@ -105,9 +111,10 @@ const Signin = () => {
 
                                    
                                     <div>
-                                        <button type="submit" onClick={handleSubmit} className="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-white transition-all duration-200 bg-blue-600 border border-transparent rounded-md focus:outline-none hover:bg-blue-700 focus:bg-blue-700">
+                                        <button type="submit" onClick={handleSubmit} className="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-white transition-all duration-200 bg-yellow-500 border border-transparent rounded-md focus:outline-none hover:bg-yellow-700 focus:bg-yellow-700">
                                             Login
                                         </button>
+                                        <ToastContainer />
                                     </div>
 
                                     <div className="text-center">

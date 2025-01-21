@@ -1,23 +1,24 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Api from "../../API/Api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 
 
-function AddProduct() {
-  const navigate=useNavigate()
-  const token=localStorage.getItem('Token')
+function EditProduct() {
+    const{_id}=useParams()
+    const navigate=useNavigate()
+    const token=localStorage.getItem('Token')
   const api=Api()
   const [sizes, setSizes] = useState([{ size: "", quantity: "" }]);
   const [productName, setProductName] = useState("");
-  const [productDetails, setProductDetails] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState([]); // Initial categories
   const [newCategory, setNewCategory] = useState(""); // State to store new category input
   const [showCategoryInput, setShowCategoryInput] = useState(false); // State to toggle category input visibility
   const [images, setImages] = useState([]); // State to toggle category input visibility
+  const [product, setProduct] = useState({}); // State to toggle category input visibility
 
 
   const handleAddSize = () => {
@@ -34,59 +35,30 @@ function AddProduct() {
     setCategory(e.target.value);
   };
 
-  const handleNewCategoryChange = (e) => {
-    setNewCategory(e.target.value);
-  };
-
-  const handleAddCategory = async() => {
-    const {data}=await axios.post(`${api}/category`,{newCategory})
-    // console.log(data);
-    // alert(data.msg)
-    toast(`${data.msg}`, {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-    });
-    
-
-    if (newCategory && !categories.includes(newCategory)) {
-      setCategories([...categories, newCategory]);
-      setCategory(newCategory); // Set the newly added category as the selected category
-      setNewCategory(""); // Clear the input field
-      setShowCategoryInput(false); // Hide the category input field
-    } else if (!newCategory) {
-      alert("Category cannot be empty");
-    } else {
-      alert("Category already exists");
-    }
-  };
 
   const handleSubmit = async(e) => {
     try {
       e.preventDefault();
       console.log({ productName, price, category, sizes,images });
-      const {data}=await axios.post(`${api}/addproduct`,{productName, price, category, sizes,images,productDetails},{ headers: { "authorization": `Bearer ${token}` } })
+      const {data}=await axios.put(`${api}/editproduct/${_id}`,{productName, price, category, sizes,images})
       console.log(data);
       toast.success(`${data.msg}`, {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-      });
-      
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+            });
+            
+            // alert(data.msg)
+            setTimeout(()=>{
+            navigate('/sell')
+            },3000)
       // alert(data.msg)
-      setTimeout(()=>{
-      navigate('/sell')
-      },3000)
+      // navigate('/sell')
     } catch (error) {
       toast.error(`${error.response.data.msg}`, {
         position: "top-right",
@@ -99,44 +71,63 @@ function AddProduct() {
         theme: "dark",
     });
     }
-    
   };
+  console.log({ productName, price, category, sizes,images});
 
 useEffect(()=>{
-    fetchCategory()
+    fetchDatas()
 },[])
-const fetchCategory=async()=>{
+const fetchDatas=async()=>{
     const {data}=await axios.get(`${api}/getcategory`)
     // console.log(data);
     const cat=data.map(cat=>cat.category)
     setCategories(cat)
+
+    // display edit details
+    const res=await axios.get(`${api}/getproduct/${_id}`,{headers:{'authorization':`Bearer ${token}`}})
+    setProduct(res.data.products)
+    setPrice(res.data.products.price)
+    setCategory(res.data.products.category)
+    setSizes(res.data.products.sizes)
+    setProductName(res.data.products.productName)
+    setImages(res.data.products.images)
+    // setSizes(res.data.sizes)
+    console.log(res.data);
 }
 
 // product image
 
-const handleFile=async(e)=>{
-    const arr=Object.values(e.target.files)
-    console.log(arr);
-    arr.map(async(img)=>{
-      const image=await convertBase64(img)
-    //   console.log(image);
-      setImages((pre)=>([...pre,image]))
+// Handle file upload and update images
+const handleFile = async (e) => {
+  const files = Object.values(e.target.files); // Get uploaded files
+  console.log(files);
+
+  // Clear current images and add the new ones
+  const newImages = await Promise.all(
+    files.map(async (file) => {
+      const photo = await convertToBase64(file); // Convert to Base64
+      return photo;
     })
-}
-function convertBase64(file){
-    return new Promise((resolve,reject)=>{
-        const fileReader=new FileReader()
-        fileReader.readAsDataURL(file);
-        fileReader.onload=()=>{
-            resolve(fileReader.result)
-        }
-        fileReader.onerror=(error)=>{
-            reject(error)
-        }
-    })
+  );
+
+  setImages(newImages); // Replace current images with new ones
+};
+
+// Convert file to Base64
+function convertToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const fileReader = new FileReader();
+    fileReader.readAsDataURL(file);
+    fileReader.onload = () => {
+      resolve(fileReader.result); // Resolve with Base64 data
+    };
+    fileReader.onerror = (error) => {
+      reject(error); // Reject on error
+    };
+  });
 }
 
-// console.log(categories);
+console.log(_id);
 
 
   return (
@@ -151,21 +142,9 @@ function convertBase64(file){
           <input
             type="text"
             id="product-name"
+            name="productName"
             value={productName}
             onChange={(e) => setProductName(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2" htmlFor="product-name">
-            Product Details:   
-          </label>
-          <input
-            type="text"
-            id="product-name"
-            value={productDetails}
-            onChange={(e) => setProductDetails(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-md"
             required
           />
@@ -179,7 +158,8 @@ function convertBase64(file){
           <input
             type="number"
             id="price"
-            value={price}
+            name="price"
+            value={product.price}
             onChange={(e) => setPrice(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-md"
             required
@@ -199,7 +179,7 @@ function convertBase64(file){
         <img
             src=''
             alt="Profile"
-            className=" w-16 h-16 object-cover rounded-md"
+            className="mt-3 w-20 h-20 object-cover rounded-md"
         />
         </div>
         </div>
@@ -213,30 +193,29 @@ function convertBase64(file){
           <div className="flex items-center gap-2">
             <select
               id="category"
-              value={category}
+              value={product.category}
               onChange={handleCategoryChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md"
               required
             >
-               <option>Select a category</option>
+               {/* <option>{product.category}</option> */}
               {categories.map((cat, index) => (
-               
                 <option key={index} value={cat}>
                   {cat}
                 </option>
               ))}
             </select>
-            <button
+            {/* <button
               type="button"
               onClick={() => setShowCategoryInput(true)}
               className="px-5 py-1 bg-yellow-500 text-white rounded"
             >
               +
-            </button>
+            </button> */}
           </div>
 
           {/* New Category Input */}
-          {showCategoryInput && (
+          {/* {showCategoryInput && (
             <div className="mt-4">
               <input
                 type="text"
@@ -252,9 +231,8 @@ function convertBase64(file){
               >
                 Add Category
               </button>
-              <ToastContainer />
             </div>
-          )}
+          )} */}
         </div>
 
         {/* Sizes and Quantities */}
@@ -303,12 +281,13 @@ function convertBase64(file){
             type="submit"
             className="w-full py-2 px-4 bg-gray-500 text-white rounded-md"
           >
-            Submit Product
+            Update Product
           </button>
+          <ToastContainer/>
         </div>
       </form>
     </div>
   );
 }
 
-export default AddProduct;
+export default EditProduct;

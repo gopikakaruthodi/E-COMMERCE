@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import Api from '../../API/Api'
+import { ToastContainer, toast } from 'react-toastify';
+
 
 const EditComapany = () => {
   const token = localStorage.getItem("Token")
@@ -9,7 +11,7 @@ const EditComapany = () => {
   const api=Api()
 
   const [updateData, setUpdateData] = useState({
-    name:'',email:'',phone:'',place:''
+    name:'',email:'',phone:'',place:'',profile:''
   })
   const [proBool, setProBool] = useState(false)
 
@@ -18,34 +20,73 @@ const EditComapany = () => {
   }, [])
 
   const fetchData = async () => {
-    if(token){
-      const {data} = await axios.get(`${api}/getcompany`, { headers: { "authorization": `Bearer ${token}` } })
-      console.log(data);
-      data? setProBool(true) : setProBool(false)
-      setUpdateData(data)
-    }
-    else{
+    try {
+      if(token){
+        const {data} = await axios.get(`${api}/getcompany`, { headers: { "authorization": `Bearer ${token}` } })
+        console.log(data);
+        data? setProBool(true) : setProBool(false)
+        setUpdateData(data)
+      }
+      else{
+        navigate('/signin')
+      }
+    } catch (error) {
+      console.log(error);
       navigate('/signin')
+      
     }
   }
 
   const handleChange = (e) => {
     setUpdateData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
+  const handleProfileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        // setProfilepic(reader.result);
+        setUpdateData((pre) => ({...pre,[e.target.name]: reader.result}));
+
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
       const {data} = await axios.post(`${api}/editcompany`, updateData, { headers: { "authorization": `Bearer ${token}` } })
-        alert(data.msg)
-        navigate('/sell')
+       toast.success(`${data.msg}`, {
+                       position: "top-right",
+                       autoClose: 3000,
+                       hideProgressBar: false,
+                       closeOnClick: false,
+                       pauseOnHover: true,
+                       draggable: true,
+                       progress: undefined,
+                       theme: "dark",
+                   });
+                   setTimeout(()=>{
+                       navigate('/signin')
+                   },3000)
     } catch (error) {
       console.log(error)
-      alert(error.response.data.msg)
+      toast.error(`${error.response.data.msg}`, {
+                      position: "top-right",
+                      autoClose: 3000,
+                      hideProgressBar: false,
+                      closeOnClick: false,
+                      pauseOnHover: true,
+                      draggable: true,
+                      progress: undefined,
+                      theme: "dark",
+                  });
     }
   }
-  console.log(proBool);
-
+  
+  console.log(updateData);
+  console.log(updateData.profile);
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full sm:w-96 lg:w-1/3">
@@ -99,14 +140,25 @@ const EditComapany = () => {
             //   placeholder="Edit here..."
             />
           </div>
+          <div>
+                <label className="block text-sm font-bold mb-2">Profile</label>
+                <input
+                  type="file"
+                  name="profile"
+                  // value={profileData.profile}
+                  onChange={handleProfileChange}
+                  className="w-1/2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+                />
+            </div>
 
           <button
             type="submit"
-            className="w-full p-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             onClick={handleSubmit}
           >
             {proBool ? 'Edit' : 'Create'}
           </button>
+          <ToastContainer/>
         </form>
 
         <div className="text-center text-sm text-gray-600 mt-4">

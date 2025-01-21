@@ -16,31 +16,32 @@ const Email = () => {
         try {
             const {data}=await axios.post("http://localhost:3000/api/email",{email})
             // console.log(data);
-            // toast(`${data.msg}`, {
-            //     position: "top-right",
-            //     autoClose: 5000,
-            //     hideProgressBar: false,
-            //     closeOnClick: false,
-            //     pauseOnHover: true,
-            //     draggable: true,
-            //     progress: undefined,
-            //     theme: "dark",
-            // });
-            alert(data.msg)
-            navigate('/signin')
+            toast.success(`${data.msg}`, {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+            });
+            setTimeout(()=>{
+                navigate('/signin')
+            },3000)
             
         } catch (error) {
             console.log(error);
-            // toast(`${error.response.data.msg}`, {
-            //     position: "top-right",
-            //     autoClose: 3000,
-            //     hideProgressBar: false,
-            //     closeOnClick: false,
-            //     pauseOnHover: true,
-            //     draggable: false,
-            //     progress: undefined,
-            //     theme: "dark",
-            // });
+            toast.error(`${error.response.data.msg}`, {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: false,
+                progress: undefined,
+                theme: "dark",
+            });
             alert(error.response.data.msg)
             
         }
@@ -78,21 +79,10 @@ const Email = () => {
                                         </div>
                                     </div> 
                                     <div>
-                                        <button type="submit" onClick={handleSubmit} className="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-white transition-all duration-200 bg-blue-600 border border-transparent rounded-md focus:outline-none hover:bg-blue-700 focus:bg-blue-700">
+                                        <button type="submit" onClick={handleSubmit} className="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-white transition-all duration-200 bg-yellow-600 border border-transparent rounded-md focus:outline-none hover:bg-yellow-700 focus:bg-yellow-700">
                                             Verify Your Email
                                         </button>
-                                        <ToastContainer
-                                            position="top-right"
-                                            autoClose={3000}
-                                            hideProgressBar={false}
-                                            newestOnTop={false}
-                                            closeOnClick={false}
-                                            rtl={false}
-                                            pauseOnFocusLoss
-                                            draggable
-                                            pauseOnHover
-                                            theme="dark"
-                                            />
+                                        <ToastContainer/>
                                     </div>                                 
                                 </div>
                             </form>

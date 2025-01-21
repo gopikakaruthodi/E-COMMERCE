@@ -3,7 +3,8 @@ import mongoose from "mongoose";
 const addrSchema=await mongoose.Schema({
     house:{type:String},
     place:{type:String},
-    pincode:{type:String}
+    pincode:{type:String},
+    userID:{type:String}
    
 })
 

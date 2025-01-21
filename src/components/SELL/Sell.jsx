@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Api from '../../API/Api';
 
-const Sell = () => {
+const Sell = ({setUser,setProfile}) => {
   const api = Api();
   const navigate = useNavigate();
   const token = localStorage.getItem('Token');
@@ -22,25 +22,31 @@ const Sell = () => {
         const { data } = await axios.get(`${api}/getcompany`, {
           headers: { 'authorization': `Bearer ${token}` },
         });
-        setCompData(data);
         data ? setProBool(true) : setProBool(false);
-
+        console.log(data);
+        
+        setCompData(data.companyData);
+        setUser(data.user.username)
+        if(data.user.profile){
+          setProfile(data.user.profile)
+        }
         // Fetch products
-        const res = await axios.get(`${api}/getproducts`);
-        setProducts(res.data);
-
+        const res = await axios.get(`${api}/getproducts`,{headers: { 'authorization': `Bearer ${token}` }});
+          setProducts(res.data.products);
+        
         // Fetch categories
         const res1 = await axios.get(`${api}/getcategory`);
         const cat = res1.data.map((cat) => cat.category);
         setCategories(cat);
       } catch (error) {
         console.log(error);
-        navigate('/signin');
+        // navigate('/signin');
       }
     } else {
-      navigate('/signin');
+      // navigate('/signin');
     }
   };
+console.log(products);
 
   // Function to get the count of products by category
   const getCategoryCount = (category) => {
@@ -49,25 +55,28 @@ const Sell = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row pl-4 w-full h-[100vh] font-sans">
+    <div className="w-full h-screen bg-gray-100 p-10 flex flex-col md:flex-row pl-4 w-full h-[100vh] font-sans">
       {/* Left Section */}
-      <div className="w-full md:w-[24%] h-full flex flex-col  border-b md:border-r-4 border-double border-black md:border-b-0">
+      <div className="w-full bg-white shadow-xl pl-5 mr-2  md:w-[24%] h-full flex flex-col  border-b md:border-r-4 md:border-b-0">
         <div className="grid">
-          <img
-            src="https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250"
-            alt="pro pic"
+          {proBool?<img
+            src={compData.profile}
             className="mt-4 w-40 h-40 rounded-full object-cover bg-cover"
-          />
+          />:<img
+          src="https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250"
+          className="mt-4 w-40 h-40 rounded-full object-cover bg-cover"
+        />}
+
           <h2 className="text-yellow-900 text-2xl  mt-3 ">-{compData.name}-</h2>
         </div>
         <div className="flex flex-col items-start w-full mt-4">
           <div className="flex items-center mb-4">
             <h5 className="text-lg font-semibold mr-2">Company Name:</h5>
-            <div className="text-md">{compData ? compData.name : '-'}</div>
+            <div className="text-md">{proBool ? compData.name : '-'}</div>
           </div>
           <div className="flex items-center mb-4">
             <h5 className="text-lg font-semibold mr-2">Email:</h5>
-            <div className="text-md">{compData ? compData.email : '-'}</div>
+            <div className="text-md">{proBool ? compData.email : '-'}</div>
           </div>
           <div className="flex items-center mb-4">
             <h5 className="text-lg font-semibold mr-2">Phone:</h5>
@@ -78,7 +87,7 @@ const Sell = () => {
             <div className="text-md">{proBool ? compData.place : '-'}</div>
           </div>
         </div>
-        <div className="w-full mt-4">
+        <div className="w-full mt-4 ">
           <Link to="/editcompany">
             <button className="bg-yellow-700 text-white py-2 px-12 rounded-full mr-2 hover:bg-yellow-600 ">{proBool ? 'Edit' : 'Create'}</button>
           </Link>
@@ -87,9 +96,12 @@ const Sell = () => {
       </div>
 
       {/* Right Section */}
-      <div className="w-full md:w-[60%] mt-4 md:mt-2">
+      <div className="w-full shadow-xl bg-white   md:w-[80%] mt-4 md:mt-2">
         <Link to="/addproduct">
-          <button className="bg-white text-yellow-600 py-2 px-4 ml-2 text-lg mb-4 rounded-md font-semibold ">+Add Products</button>
+          <button className="bg-white text-yellow-700 py-2 px-4 ml-2 text-lg mb-4 rounded-md font-semibold ">+Add Products</button>
+        </Link>
+        <Link to="/sellorderslist" className=' float-right'>
+          <button className="bg-white text-yellow-800 py-2 px-4 ml-2 text-lg mb-4 rounded-md font-semibold ">New Orders</button>
         </Link>
 
         <div className="grid grid-cols-1 ml-5 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
