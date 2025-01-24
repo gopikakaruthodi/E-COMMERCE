@@ -4,9 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "client": "vite",
-    "server": "nodemon server/app.js",
-    "dev": "concurrently \"npm run client\" \"npm run server\" ",
+    "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"

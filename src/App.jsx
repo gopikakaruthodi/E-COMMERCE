@@ -19,10 +19,11 @@ import EmptyCart from "./components/Cart/EmptyCart"
 import BuyNowPage from "./components/BuyNow.jsx/BuyNow"
 import OrdersList from "./components/Order/OrdersList"
 import SellOrdersList from "./components/Order/Sell-OrderList"
+import Password from "./components/Password/Password"
+
 import { useState } from "react"
 
 function App() {
-  const showNav = location.pathname !== '/signin' && location.pathname !== '/signup';
   const [user,setUser]=useState("")
   const [profile,setProfile]=useState("")
 
@@ -51,6 +52,8 @@ function App() {
         <Route path="/buynow/:_id" element={<BuyNowPage setUser={setUser} setProfile={setProfile} />}/>
         <Route path="/orderslist" element={<OrdersList setUser={setUser} setProfile={setProfile} />}/>
         <Route path="/sellorderslist" element={<SellOrdersList setUser={setUser} setProfile={setProfile} />}/>
+        <Route path="/password" Component={Password}/>
+
 
       </Routes>
     </BrowserRouter>

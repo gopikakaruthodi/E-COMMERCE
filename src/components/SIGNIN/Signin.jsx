@@ -54,10 +54,10 @@ const Signin = () => {
     }
   return (
     <>
-     <section className="py-10 bg-gray-50 sm:py-16 lg:py-24">
+     <section className="py-10 bg-gray-50 ">
             <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div className="max-w-2xl mx-auto text-center">
-                    <h2 className="text-3xl font-bold leading-tight text-black sm:text-4xl lg:text-5xl">Login Here</h2>
+                    <h2 className="text-xl font-bold leading-tight text-black sm:text-4xl lg:text-5xl">Login Here</h2>
                     {/* <p className="max-w-xl mx-auto mt-4 text-base leading-relaxed text-gray-600">You can create a free Celebration account in 2 minutes</p> */}
                 </div>
 
@@ -108,7 +108,10 @@ const Signin = () => {
                                             />
                                         </div>
                                     </div>
-
+                                {/* forgot password */}
+                                    <div className=" mt-2">
+                                        <p><Link to="/password" className="font-medium text-blue-400 hover:text-blue-600">Forgot password</Link></p>
+                                    </div>
                                    
                                     <div>
                                         <button type="submit" onClick={handleSubmit} className="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-white transition-all duration-200 bg-yellow-500 border border-transparent rounded-md focus:outline-none hover:bg-yellow-700 focus:bg-yellow-700">

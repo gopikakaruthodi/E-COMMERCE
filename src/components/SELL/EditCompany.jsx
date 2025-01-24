@@ -25,7 +25,7 @@ const EditComapany = () => {
         const {data} = await axios.get(`${api}/getcompany`, { headers: { "authorization": `Bearer ${token}` } })
         console.log(data);
         data? setProBool(true) : setProBool(false)
-        setUpdateData(data)
+        setUpdateData(data.companyData)
       }
       else{
         navigate('/signin')
@@ -68,7 +68,7 @@ const EditComapany = () => {
                        theme: "dark",
                    });
                    setTimeout(()=>{
-                       navigate('/signin')
+                       navigate('/sell')
                    },3000)
     } catch (error) {
       console.log(error)

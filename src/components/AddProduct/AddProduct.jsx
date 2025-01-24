@@ -26,8 +26,14 @@ function AddProduct() {
 
   const handleSizeChange = (index, field, value) => {
     const updatedSizes = [...sizes];
-    updatedSizes[index][field] = value;
+    if(field === "quantity")
+      updatedSizes[index][field] = Number(value);
+    else{
+      updatedSizes[index][field] = value;
+    }
     setSizes(updatedSizes);
+
+   
   };
 
   const handleCategoryChange = (e) => {
@@ -305,6 +311,7 @@ function convertBase64(file){
           >
             Submit Product
           </button>
+          <ToastContainer/>
         </div>
       </form>
     </div>

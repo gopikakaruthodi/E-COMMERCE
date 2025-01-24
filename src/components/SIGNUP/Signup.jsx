@@ -13,15 +13,71 @@ const Signup = () => {
     const [userData,setuserData]=useState({
         username:"",email:"",phone:"",password:"",cpassword:"",accountType:""
     })
+    const [emailError, setEmailError] = useState('');
+    const [passwordError, setPasswordError] = useState('');   
+    const [phoneError, setPhoneError] = useState('');   
+    const passwordRegex = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,16}$/;
+    const emailRegex = /^\S+@\S+\.\S+$/;
+    const phoneRegex = /^\d{10}$/;
+
 
     const handleChange=(e)=>{
         setuserData((pre)=>({...pre,[e.target.name]:e.target.value}))
     }
+
+    const validatePassword = (value) => {
+        if (!passwordRegex.test(value)) {
+            setPasswordError(
+            'Password must be 8-16 characters long, include uppercase, lowercase, number, and special character.'
+          );
+        } else {
+            setPasswordError('');
+        }
+      };
+    
+      const handlePasswordChange = (e) => {
+        const value = e.target.value;
+        setuserData((pre)=>({...pre,[e.target.name]:e.target.value}))
+        validatePassword(value);
+      };
+    
+      const validateEmail = (value) => {
+        if (!emailRegex.test(value)) {
+          setEmailError('Invalid email format.');
+        } else {
+          setEmailError('');
+        }
+      };
+    
+      const handleEmailChange = (e) => {
+        const value = e.target.value;
+        setuserData((pre)=>({...pre,[e.target.name]:e.target.value}))
+        validateEmail(value);
+      };
+
+      function validatePhoneNumber(phoneNumber) {
+
+        if (!phoneRegex.test(phoneNumber)) {
+            setPhoneError(
+            'Phone number must be 10 digits'
+          );
+        } else {
+            setPhoneError('');
+        }
+      }
+
+      const handlePhoneChange = (e) => {
+        const value = e.target.value;
+        setuserData((pre)=>({...pre,[e.target.name]:e.target.value}))
+        validatePhoneNumber(value);
+      };
+console.log(phoneError);
+
     const handleSubmit=async(e)=>{
         e.preventDefault()
         try {
             const {data}=await axios.post(`${api}/signup`,userData)
-            toast(`${data.msg}`, {
+            toast.success(`${data.msg}`, {
                 position: "top-right",
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -40,7 +96,7 @@ const Signup = () => {
             
         } catch (error) {
             console.log(error);
-            toast(`${error.response.data.msg}`, {
+            toast.error(`${error.response.data.msg}`, {
                 position: "top-right",
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -101,30 +157,32 @@ const Signup = () => {
                                             <input
                                                 type="email"
                                                 name="email"
-                                                onChange={handleChange}
+                                                onChange={handleEmailChange}
                                                 placeholder="Enter email to get started"
                                                 className="block w-full py-4 pl-10 pr-4 text-black placeholder-gray-500 transition-all duration-200 bg-white border border-gray-200 rounded-md focus:outline-none focus:border-blue-600 caret-blue-600"
                                             />
                                         </div>
-                                    </div>
+                                        {emailError && <p style={{ color: 'red',fontSize:'13px' }}>{emailError}</p>}
+                                        </div>
 
                                     <div>
                                         <label htmlFor="" className="text-base font-medium text-gray-900"> PHONE </label>
                                         <div className="mt-2.5 relative text-gray-400 focus-within:text-gray-600">
                                             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                {/* <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                                                </svg>
+                                                </svg> */}
                                             </div>
 
                                             <input
                                                 type="text"
                                                 name="phone"
-                                                onChange={handleChange}
+                                                onChange={handlePhoneChange}
                                                 placeholder=""
                                                 className="block w-full py-4 pl-10 pr-4 text-black placeholder-gray-500 transition-all duration-200 bg-white border border-gray-200 rounded-md focus:outline-none focus:border-blue-600 caret-blue-600"
                                             />
                                         </div>
+                                        {phoneError && <p style={{ color: 'red',fontSize:'13px' }}>{phoneError}</p>}
                                     </div>
 
                                     <div className='w-full flex justify-between'>
@@ -146,11 +204,13 @@ const Signup = () => {
                                                 type="password"
                                                 name="password"
                                                 id="password"
-                                                onChange={handleChange}
+                                                onChange={handlePasswordChange}
                                                 placeholder="Enter your password"
                                                 className="block w-full py-4 pl-10 pr-4 text-black placeholder-gray-500 transition-all duration-200 bg-white border border-gray-200 rounded-md focus:outline-none focus:border-blue-600 caret-blue-600"
                                             />
+
                                         </div>
+                                        {passwordError && <p style={{ color: 'red' , fontSize:'10px' , width:'200px' }}>{passwordError}</p>}
                                     </div>
                                     <div>
                                         <label htmlFor="" className="text-base font-medium text-gray-900"> Confirm Password </label>

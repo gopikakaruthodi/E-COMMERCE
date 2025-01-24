@@ -7,10 +7,27 @@ import { ToastContainer, toast } from 'react-toastify';
 const Email = () => {
     const [email,setEmail]=useState("")
     const navigate=useNavigate()
+    const [emailError, setEmailError] = useState('');
+    
+    const emailRegex = /^\S+@\S+\.\S+$/;
 
-    const handleChange=(e)=>{
-        setEmail(e.target.value)
-    }
+  
+
+    const validateEmail = (value) => {
+        if (!emailRegex.test(value)) {
+          setEmailError('Invalid email format.');
+        } else {
+          setEmailError('');
+        }
+      };
+    
+      const handleEmailChange = (e) => {
+        const value = e.target.value;
+        setEmail(value);
+        validateEmail(value);
+      };
+    
+    
     const handleSubmit=async(e)=>{
         e.preventDefault()
         try {
@@ -74,9 +91,10 @@ const Email = () => {
                                                 id=""
                                                 placeholder="Enter email to get started"
                                                 className="block w-full py-4 pl-10 pr-4 text-black placeholder-gray-500 transition-all duration-200 bg-white border border-gray-200 rounded-md focus:outline-none focus:border-blue-600 caret-blue-600"
-                                                onChange={handleChange}
+                                                onChange={handleEmailChange}
                                             />
                                         </div>
+                                                    {emailError && <p style={{ color: 'red',fontSize:'13px' }}>{emailError}</p>}
                                     </div> 
                                     <div>
                                         <button type="submit" onClick={handleSubmit} className="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-white transition-all duration-200 bg-yellow-600 border border-transparent rounded-md focus:outline-none hover:bg-yellow-700 focus:bg-yellow-700">

@@ -18,7 +18,7 @@ const Wishlist = ({setUser,setProfile}) => {
       try {
         if(token){
           const {data}=await axios.get(`${api}/displaywish`, { headers: { "authorization": `Bearer ${token}` } })
-          // console.log(data);
+          console.log(data);
           setProducts(data.products)
           setUser(data.user.username)
           if(data.user.profile){

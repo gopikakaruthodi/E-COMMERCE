@@ -159,7 +159,7 @@ console.log(_id);
             type="number"
             id="price"
             name="price"
-            value={product.price}
+            value={price}
             onChange={(e) => setPrice(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-md"
             required
@@ -193,7 +193,7 @@ console.log(_id);
           <div className="flex items-center gap-2">
             <select
               id="category"
-              value={product.category}
+              value={category}
               onChange={handleCategoryChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md"
               required

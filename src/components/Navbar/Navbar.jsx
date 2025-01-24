@@ -34,7 +34,7 @@ const Navbar = ({user,profile}) => {
   };
   useEffect(()=>{
     fetchData()
-  },[])
+  },[isMenuOpen,isDropdownOpen])
   const fetchData= async()=>{
     const { data } = await axios.get(`${api}/displaycart`, {
       headers: { authorization: `Bearer ${token}` },
@@ -153,21 +153,34 @@ const Navbar = ({user,profile}) => {
       <div className="md:hidden bg-white shadow-md mt-2 rounded-md">
         <ul className="py-2">
           <li>
-            <Link
-              to="/profile"
-              className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-            >
-              Profile
-            </Link>
+          <Link
+                  to="/profile"
+                  className="flex items-center justify-left  text-yellow-800 px-4 py-2 font-bold hover:text-yellow-700"
+                >
+                  <span><CgProfile className='w-6 h-6 pr-2' /></span>
+                  <span className=''> My Profile</span>
+              </Link>
           </li>
-          <li>
-            <button
-              onClick={logout}
-              className="block w-full text-center px-4 py-2 text-gray-800 hover:bg-gray-200"
-            >
-              Logout
-            </button>
-          </li>
+          <hr className='text-gray-900 ' />
+              <li>
+              <Link
+                  to="/wishlist"
+                  className="flex items-center justify-left  text-yellow-800 px-4 py-2 font-bold hover:text-yellow-700"
+                >
+                  <span><IoHeartSharp className='w-6 h-6 pr-2' /></span>
+                  <span className=''> My Wishlist</span>
+                </Link>
+              </li>
+              <hr className='text-gray-900 ' />
+              <li>
+                <button
+                  className="block flex items-center justify-left w-full text-center px-4 py-2 font-bold text-yellow-800 hover:text-yellow-700"
+                  onClick={logout}
+                >
+                <span><TbLogout className='w-6 h-6 pr-2'  /></span>
+                <span >Logout</span>
+                </button>
+              </li>
         </ul>
       </div>
     )}

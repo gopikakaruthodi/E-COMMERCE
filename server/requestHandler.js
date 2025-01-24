@@ -147,6 +147,27 @@ export async function checkEmail(req,res) {
     
 }
 
+export async function changePassword(req,res) {
+    try {
+        const{password,cpassword,email}=req.body
+        const user=await userSchema.findOne({email})
+        if(!user)
+            res.status(404).send({msg:"invalid user"})
+         if(password!=cpassword)
+            return res.status(404).send("Password Mismatch")
+         bcrypt.hash(password,10).then(async(hashedPassword)=>{
+            //  console.log(hashedPassword); 
+             await userSchema.updateOne({email},{$set:{password:hashedPassword}}).then(()=>{
+                 res.status(201).send({msg:"Your Password has been reset"})
+             }).catch((error)=>{
+                 res.status(404).send({msg:error})
+             }) 
+         }) 
+    } catch (error) {
+        console.log(error);
+    } 
+}
+
 export async function displayProfile(req,res) {
    try {
     // console.log(req.user);
@@ -473,15 +494,23 @@ export async function addToWishlist(req,res) {
   export async function displayWishlist(req,res) {
     try {
         const _id=req.user
+        console.log(_id);
+        
         const user=await userSchema.findOne({_id},{username:1,profile:1})
         if(!user)
             res.status(404).send({msg:'Invalid user'})
 
         const wish=await wishListSchema.find({buyerID:_id})
+        console.log(wish);
+        
         const dataPromises = wish.map(async (data) => {
-            return await productSchema.findOne({ _id: data.productID,user });
+            return await productSchema.findOne({ _id: data.productID});
         });
+        console.log(dataPromises);
+        
         const products = await Promise.all(dataPromises);
+        console.log(products);
+        
         res.status(200).send({products,user})
     } catch (error) {
         console.log(error);
@@ -649,10 +678,11 @@ export async function acceptOrder(req,res){
             return res.status(404).send({ msg:"no orders"});
         
         const pid = order.product._id
+
         const productPromise = quantityData.map(async(d)=>{
             if(pid===d.productID){
                 const size = d.size
-                const quantity = d.quantity
+                const quantity = d.quantity;
                 await productSchema.updateOne(
                     { _id: pid,"sizes.size":d.size }, // Find the product by its ID
                     { $inc: { "sizes.$.quantity": -quantity } } // Decrease quantity
